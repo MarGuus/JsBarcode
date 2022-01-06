@@ -32,7 +32,8 @@ var CODE128B = function (_CODE) {
 	_createClass(CODE128B, [{
 		key: 'valid',
 		value: function valid() {
-			return new RegExp('^' + _constants.B_CHARS + '+$').test(this.data);
+			//return (new RegExp(`^${B_CHARS}+$`)).test(this.data);
+			return true;
 		}
 	}]);
 

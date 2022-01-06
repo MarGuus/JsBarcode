@@ -1,4 +1,4 @@
-// Import all the barcodes
+// Import all the barcodes 12345
 import barcodes from './barcodes/';
 
 // Help functions

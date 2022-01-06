@@ -51,7 +51,7 @@ var API = function API() {};
 
 
 // Exceptions
-// Import all the barcodes
+// Import all the barcodes 12345
 var JsBarcode = function JsBarcode(element, text, options) {
 	var api = new API();
 

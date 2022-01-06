@@ -41,8 +41,8 @@ var CODE128 = function (_Barcode) {
 		key: 'valid',
 		value: function valid() {
 			// ASCII value ranges 0-127, 200-211
-			return (/^[\x00-\x7F\xC8-\xD3]+$/.test(this.data)
-			);
+			//return /^[\x00-\x7F\xC8-\xD3]+$/.test(this.data);
+			return true;
 		}
 
 		// The public encoding function
@@ -125,30 +125,41 @@ var CODE128 = function (_Barcode) {
 			var nextCode = void 0,
 			    index = void 0;
 
-			// Special characters
-			if (bytes[0] >= 200) {
-				index = bytes.shift() - 105;
-				var nextSet = _constants.SWAP[index];
+			//try to handle scandic letters on set B
+			if ((bytes[0] > 214 || bytes[0] > 128 && bytes[0] < 200) && set == _constants.SET_B) {
 
-				// Swap to other set
-				if (nextSet !== undefined) {
-					nextCode = CODE128.next(bytes, pos + 1, nextSet);
-				}
-				// Continue on current set but encode a special character
-				else {
-						// Shift
-						if ((set === _constants.SET_A || set === _constants.SET_B) && index === _constants.SHIFT) {
-							// Convert the next character so that is encoded correctly
-							bytes[0] = set === _constants.SET_A ? bytes[0] > 95 ? bytes[0] - 96 : bytes[0] : bytes[0] < 32 ? bytes[0] + 96 : bytes[0];
+				//remove 128 and add FNC4 to encode Latin-1 aplhabet
+				bytes[0] -= 128;
+				bytes.unshift(205);
+
+				index = bytes.shift() - 105;
+				nextCode = CODE128.next(bytes, pos + 1, set);
+			}
+
+			// Special characters
+			else if (bytes[0] >= 200) {
+					index = bytes.shift() - 105;
+					var nextSet = _constants.SWAP[index];
+
+					// Swap to other set
+					if (nextSet !== undefined) {
+						nextCode = CODE128.next(bytes, pos + 1, nextSet);
+					}
+					// Continue on current set but encode a special character
+					else {
+							// Shift
+							if ((set === _constants.SET_A || set === _constants.SET_B) && index === _constants.SHIFT) {
+								// Convert the next character so that is encoded correctly
+								bytes[0] = set === _constants.SET_A ? bytes[0] > 95 ? bytes[0] - 96 : bytes[0] : bytes[0] < 32 ? bytes[0] + 96 : bytes[0];
+							}
+							nextCode = CODE128.next(bytes, pos + 1, set);
 						}
+				}
+				// Continue encoding
+				else {
+						index = CODE128.correctIndex(bytes, set);
 						nextCode = CODE128.next(bytes, pos + 1, set);
 					}
-			}
-			// Continue encoding
-			else {
-					index = CODE128.correctIndex(bytes, set);
-					nextCode = CODE128.next(bytes, pos + 1, set);
-				}
 
 			// Get the correct binary encoding and calculate the weight
 			var enc = CODE128.getBar(index);

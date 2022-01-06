@@ -14,7 +14,8 @@ class CODE128 extends Barcode {
 
 	valid() {
 		// ASCII value ranges 0-127, 200-211
-		return /^[\x00-\x7F\xC8-\xD3]+$/.test(this.data);
+		//return /^[\x00-\x7F\xC8-\xD3]+$/.test(this.data);
+		return true;
 	}
 
 	// The public encoding function
@@ -86,8 +87,20 @@ class CODE128 extends Barcode {
 
 		let nextCode, index;
 
+		//try to handle scandic letters on set B
+		if ((bytes[0] > 214 || (bytes[0] >128 && bytes[0] < 200)) && set == SET_B){
+			
+			//remove 128 and add FNC4 to encode Latin-1 aplhabet
+			bytes[0] -= 128;
+			bytes.unshift(205);
+
+			//FNC4 is special character so adjust for index
+			index = bytes.shift() - 105;
+			nextCode = CODE128.next(bytes, pos + 1, set);
+		}
+
 		// Special characters
-		if (bytes[0] >= 200){
+		else if (bytes[0] >= 200){
 			index = bytes.shift() - 105;
 			const nextSet = SWAP[index];
 

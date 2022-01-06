@@ -11,9 +11,9 @@ require('./automation/misc.js');
 
 
 gulp.task('watch', gulp.series(['compile'], function () {
-	gulp.watch("src/**/*", ['compile']);
+	gulp.watch("src/**/*", gulp.series(['compile']));
 }));
 
 gulp.task('watch-web', gulp.series(['webpack'], function () {
-	gulp.watch("src/**/*", ['webpack']);
+	gulp.watch("src/**/*",gulp.series(['webpack']));
 }));
